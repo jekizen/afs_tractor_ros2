@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<robot name="afs_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Фиксированные параметры -->
+  <xacro:property name="wheel_radius" value="0.3" />
+  <xacro:property name="wheel_width" value="0.15" />
+  <xacro:property name="frame_length" value="1.0" />
+  <xacro:property name="frame_width" value="0.8" />
+  <xacro:property name="frame_height" value="0.2" />
+  <xacro:property name="articulation_offset" value="0.5" />
+
+  <!-- Предварительные вычисления -->
+  <xacro:property name="fl_x" value="${frame_length/2}" />
+  <xacro:property name="fl_y" value="${frame_width/2}" />
+  <xacro:property name="fr_x" value="${frame_length/2}" />
+  <xacro:property name="fr_y" value="${-frame_width/2}" />
+  <xacro:property name="rl_x" value="${-frame_length/2}" />
+  <xacro:property name="rl_y" value="${frame_width/2}" />
+  <xacro:property name="rr_x" value="${-frame_length/2}" />
+  <xacro:property name="rr_y" value="${-frame_width/2}" />
+  <xacro:property name="art_x" value="${-(frame_length/2 + articulation_offset)}" />
+  <xacro:property name="pi" value="3.1415926535897931" />
+  
+  <!-- Базовый линк (мир) -->
+	<link name="base_link"/>
+
+	<!-- Крепление передней рамы к базе -->
+	<joint name="base_to_front" type="fixed">
+		<parent link="base_link"/>
+		<child link="front_frame"/>
+		<origin xyz="0 0 ${frame_height/2}" rpy="0 0 0"/>
+	</joint>
+
+  <!-- Основные рамы -->
+  <link name="front_frame">
+    <visual>
+      <geometry>
+        <box size="${frame_length} ${frame_width} ${frame_height}"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0 0 0.8 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <link name="rear_frame">
+    <visual>
+      <geometry>
+        <box size="${frame_length} ${frame_width} ${frame_height}"/>
+      </geometry>
+      <material name="red">
+        <color rgba="0.8 0 0 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- Шарнир сочленения -->
+  <joint name="articulation_joint" type="revolute">
+    <parent link="front_frame"/>
+    <child link="rear_frame"/>
+    <origin xyz="${art_x} 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="${-pi/4}" upper="${pi/4}" effort="100" velocity="1.0"/>
+  </joint>
+
+  <!-- Макрос для колеса с правильной ориентацией -->
+  <xacro:macro name="wheel" params="prefix parent x y">
+    <link name="${prefix}_wheel">
+      <visual>
+        <!-- Колесо лежит горизонтально -->
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0 0 0 1"/>
+        </material>
+        <origin rpy="${pi/2} 0 0" xyz="0 0 0"/> <!-- Поворот на 90° вокруг X -->
+      </visual>
+    </link>
+
+    <joint name="${prefix}_drive_joint" type="continuous">
+      <parent link="${parent}"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="${x} ${y} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/> <!-- Ось вращения горизонтальна -->
+    </joint>
+
+    <transmission name="${prefix}_drive_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}_drive_joint">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+  </xacro:macro>
+
+  <!-- 4 колеса -->
+  <xacro:wheel prefix="front_left" parent="front_frame" x="${fl_x}" y="${fl_y}"/>
+  <xacro:wheel prefix="front_right" parent="front_frame" x="${fr_x}" y="${fr_y}"/>
+  <xacro:wheel prefix="rear_left" parent="rear_frame" x="${rl_x}" y="${rl_y}"/>
+  <xacro:wheel prefix="rear_right" parent="rear_frame" x="${rr_x}" y="${rr_y}"/>
+
+  <!-- ros2_control -->
+  <ros2_control name="afs_control" type="system">
+    <hardware>
+      <plugin>fake_components/FakeSystem</plugin>
+    </hardware>
+    
+    <!-- Шарнир сочленения -->
+    <joint name="articulation_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    
+    <!-- Приводные шарниры -->
+    <joint name="front_left_drive_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="front_right_drive_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_left_drive_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rear_right_drive_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+</robot>
