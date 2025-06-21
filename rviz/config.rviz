@@ -102,7 +102,8 @@ Visualization Manager:
     Fixed Frame: base_link
     Frame Rate: 30
   Name: root
-  Tools: ~
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
   Transformation:
     Current:
       Class: rviz_default_plugins/TF
@@ -110,7 +111,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 5
+      Distance: 3.7071266174316406
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -125,10 +126,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7853981852531433
+      Pitch: 0.7403982281684875
       Target Frame: base_link
       Value: Orbit (rviz_default_plugins)
-      Yaw: 0.7853981852531433
+      Yaw: 0.590398371219635
     Saved: ~
 Window Geometry:
   Displays:

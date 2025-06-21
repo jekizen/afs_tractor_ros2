@@ -25,6 +25,13 @@
   <xacro:property name="art_x" value="${-(frame_length/2 + articulation_offset)}" />
   <xacro:property name="pi" value="3.1415926535897931" />
   
+  <!-- Добавим фреймы для одометрии -->
+	<link name="odom"/>
+	<joint name="odom_to_base" type="fixed">
+		<parent link="odom"/>
+		<child link="base_link"/>
+	</joint>
+  
   <!-- Базовый линк (мир) -->
 	<link name="base_link"/>
 
@@ -132,5 +139,7 @@
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
     </joint>
+    <state_interface name="front_left_drive_joint/position"/>
+    <state_interface name="front_right_drive_joint/position"/>
   </ros2_control>
 </robot>

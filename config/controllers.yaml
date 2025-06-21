@@ -20,3 +20,13 @@ controller_manager:
       joints:
         - front_right_drive_joint
         - rear_right_drive_joint
+        
+    velocity_controller:
+			type: diff_drive_controller/DiffDriveController
+			left_wheel_names: ["front_left_drive_joint", "rear_left_drive_joint"]
+			right_wheel_names: ["front_right_drive_joint", "rear_right_drive_joint"]
+			wheel_separation: ${base_width}  # Ширина рамы (из URDF)
+			wheel_radius: ${wheel_radius}    # Радиус колеса (из URDF)
+			odom_frame_id: odom
+			base_frame_id: base_link
+			publish_rate: 50
